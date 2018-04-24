@@ -1,0 +1,16 @@
+include_defs("//experimental/deeplearning/vision/coco2017/DEFS")
+
+lib_path = get_root_path(__file__)
+
+python_library(
+    name = "py-motmetrics",
+    srcs = glob(
+        ["**/*.py"],
+        # excludes = ["**/__init__.py"],
+    ),
+    base_module = "",
+    deps = [
+    ],
+    external_deps = [
+    ],
+)
