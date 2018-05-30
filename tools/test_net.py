@@ -16,7 +16,8 @@ from __future__ import unicode_literals
 import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 
 from caffe2.python import workspace
-from core.rpn_generator import generate_rpn_on_range, generate_rpn_on_dataset
+# Not used in this code
+# from core.rpn_generator import generate_rpn_on_range, generate_rpn_on_dataset
 from core.config import (cfg, cfg_from_file, cfg_from_list, assert_and_infer_cfg,
                          get_output_dir)
 import utils.c2
