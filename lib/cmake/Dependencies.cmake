@@ -7,6 +7,9 @@
 # Caffe2 (`make install` populates your share/cmake/Caffe2).
 find_package(Caffe2 REQUIRED)
 
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 # Find CUDA.
 include(cmake/Cuda.cmake)
 if (HAVE_CUDA)
