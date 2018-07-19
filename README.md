@@ -31,7 +31,7 @@ If you have used [Detectron](https://github.com/facebookresearch/Detectron), you
 In any case, the following instructions should get you started. I would strongly recommend using anaconda, as it makes it really easy to install most libraries required to compile caffe2 and other ops. First start by cloning this code:
 
 ```bash
-$ git clone https://github.com/rohitgirdhar/DetectAndTrack.git
+$ git clone https://github.com/facebookresearch/DetectAndTrack.git
 $ cd DetectAndTrack
 ```
 
