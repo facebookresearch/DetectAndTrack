@@ -1,5 +1,5 @@
 #Script to run DetectandTrack Code on a single video which may or may not belong to any dataset.
-#Inputs: Path 
+ 
 
 import os
 import os.path as osp
