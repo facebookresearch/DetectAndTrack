@@ -253,23 +253,23 @@ def main(name_scope, gpu_dev, num_images, args):
     model = initialize_model_from_cfg()
     num_classes = cfg.MODEL.NUM_CLASSES
     all_boxes, all_segms, all_keyps = empty_results(num_classes, num_images)
+
     for i in range(num_images):
-        print('Processing Detection for Image %d'%(i+1))
+        print('Processing Detection for Frame %d'%(i+1))
         im_ = _read_video_frames(args.out_path, args.vid_name, i) 
         im_ = np.expand_dims(im_, 0)
         with core.NameScope(name_scope):
             with core.DeviceScope(gpu_dev):
                 cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
-                    model, im_, None) #TODO: Parallelize detection
+                    model, im_, None)                                        #TODO: Parallelize detection
 
-	    extend_results(i, all_boxes, cls_boxes_i)
+	extend_results(i, all_boxes, cls_boxes_i)
         if cls_segms_i is not None:
             extend_results(i, all_segms, cls_segms_i)
         if cls_keyps_i is not None:
             extend_results(i, all_keyps, cls_keyps_i)
 
-        im_name = '%08d.jpg'%(i+1)
-        im_ = im_.squeeze()
+    
     cfg_yaml = yaml.dump(cfg)
     
     det_name = args.vid_name + '_detections.pkl'
@@ -282,6 +282,7 @@ def main(name_scope, gpu_dev, num_images, args):
         det_file)
 
     frames = sorted(glob.glob(osp.join(args.out_path,args.vid_name + '_frames','*.jpg')))
+
     out_detrack_file = osp.join(args.out_path, args.vid_name + '_detections_withTracks.pkl')
 
     # Debug configurations
@@ -304,9 +305,8 @@ def main(name_scope, gpu_dev, num_images, args):
         lstm_model.cuda()
     else:
         lstm_model = None
-    tic_track = time.time()
+
     dets_withTracks = compute_matches_tracks(frames, dets, lstm_model)
-    toc_track = time.time()
     _write_det_file(dets_withTracks, out_detrack_file)
     
     for i in range(num_images):
@@ -319,17 +319,21 @@ if __name__=='__main__':
     if args.out_path == None:
         args.out_path = args.video_path
     args.vid_name = args.video_path.split('/')[-1].split('.')[0]
+
     utils.c2.import_custom_ops()
     utils.c2.import_detectron_ops()
     utils.c2.import_contrib_ops()
+
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
     if args.opts is not None:
         cfg_from_list(args.opts)
     assert_and_infer_cfg()
+
     if osp.exists(osp.join(args.out_path,args.vid_name + '_vis')):
         shutil.rmtree(osp.join(args.out_path, args.vid_name + '_vis'))
     os.makedirs(osp.join(args.out_path,args.vid_name+ '_vis'))
+
     num_images = _read_video(args)
     gpu_dev = core.DeviceOption(caffe2_pb2.CUDA, cfg.ROOT_GPU_ID)
     name_scope = 'gpu_{}'.format(cfg.ROOT_GPU_ID)
