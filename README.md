@@ -206,6 +206,15 @@ $ python launch.py \
 ```
 This should reproduce the performance reported above, 55.2% MOTA and 60.6% mAP. Similarly, you can run testing for any model provided, using the corresponding config file.
 
+In addition, we can also compute detections and tracks for a single video by running the script `test_on_single_video.py`.
+
+```bash
+$ python test_on_single_video.py \
+         --cfg configs/video2d_best/01_R101_best_hungarian-4GPU.yaml \
+         --video path/to/video.mp4 \
+         --output path/to/output/tracks_and_visualizations \
+         TEST.WEIGHTS pretrained_models/configs/video/2d_best/01_R101_best_hungarian-4GPU.yaml/model_final.pkl
+```
 ### Training models
 
 The models reported in the paper were originally trained on 8xP100 (16GB) GPUs. Since many users might not have access to such GPUs, we also provide alternative configurations that have been trained/tested on 1080Ti (11GB) GPUs. To reduce the memory requirement, we reduce the batch size, and scale down the learning rate by the same factor. We scale up the iteration schedule (total iterations, step size) by the same factor as well, and so far have obtained nearly similar performance.
