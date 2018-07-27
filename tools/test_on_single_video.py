@@ -1,5 +1,5 @@
 #Script to run DetectandTrack Code on a single video which may or may not belong to any dataset.
- 
+
 
 import os
 import os.path as osp
@@ -33,7 +33,7 @@ try:
 except AttributeError:
     pass
 
-MAX_TRACK_IDS = 999 
+MAX_TRACK_IDS = 999
 FIRST_TRACK_ID = 0
 
 
@@ -65,9 +65,9 @@ def _read_video(args):
     temp_frame_folder = osp.join(args.out_path,args.vid_name + '_frames/')
     if os.path.exists(temp_frame_folder):
       shutil.rmtree(temp_frame_folder)
-    os.makedirs(temp_frame_folder)  
+    os.makedirs(temp_frame_folder)
     while success:
-        cv2.imwrite(osp.join(temp_frame_folder,'%08d.jpg' % count), image)     # save frame as JPEG file      
+        cv2.imwrite(osp.join(temp_frame_folder,'%08d.jpg' % count), image)     # save frame as JPEG file
         success,image = vidcap.read()
         count += 1
     return count-1
@@ -143,7 +143,7 @@ def _compute_distance_matrix(
         elif cost_type == 'cnn-cosdist':
             all_Cs.append(_compute_pairwise_deep_cosine_dist(
                 prev_img_path, prev_boxes,
-                curr_img_path, cur_boxes))
+                cur_img_path, cur_boxes))
         elif cost_type == 'pose-pck':
             kps_names = cur_json_data['dataset'].person_cat_info['keypoints']
             all_Cs.append(_compute_pairwise_kpt_distance(
@@ -249,14 +249,14 @@ def compute_matches_tracks(frames, dets, lstm_model):
     return dets
 
 def main(name_scope, gpu_dev, num_images, args):
-    
+
     model = initialize_model_from_cfg()
     num_classes = cfg.MODEL.NUM_CLASSES
     all_boxes, all_segms, all_keyps = empty_results(num_classes, num_images)
 
     for i in range(num_images):
         print('Processing Detection for Frame %d'%(i+1))
-        im_ = _read_video_frames(args.out_path, args.vid_name, i) 
+        im_ = _read_video_frames(args.out_path, args.vid_name, i)
         im_ = np.expand_dims(im_, 0)
         with core.NameScope(name_scope):
             with core.DeviceScope(gpu_dev):
@@ -269,9 +269,9 @@ def main(name_scope, gpu_dev, num_images, args):
         if cls_keyps_i is not None:
             extend_results(i, all_keyps, cls_keyps_i)
 
-    
+
     cfg_yaml = yaml.dump(cfg)
-    
+
     det_name = args.vid_name + '_detections.pkl'
     det_file = osp.join(args.out_path, det_name)
     robust_pickle_dump(
@@ -308,7 +308,7 @@ def main(name_scope, gpu_dev, num_images, args):
 
     dets_withTracks = compute_matches_tracks(frames, dets, lstm_model)
     _write_det_file(dets_withTracks, out_detrack_file)
-    
+
     for i in range(num_images):
         vis_im = _generate_visualizations(frames[i], i, dets['all_boxes'], dets['all_keyps'], dets['all_tracks'])
         cv2.imwrite(osp.join(args.out_path, args.vid_name + '_vis','%08d.jpg'%(i+1)),vis_im)

@@ -206,7 +206,9 @@ $ python launch.py \
 ```
 This should reproduce the performance reported above, 55.2% MOTA and 60.6% mAP. Similarly, you can run testing for any model provided, using the corresponding config file.
 
-In addition, we can also compute detections and tracks for a single video by running the script `test_on_single_video.py`.
+### Testing without evaluation
+
+In addition, we can also compute detections and tracks for a single standalone video by running the script `test_on_single_video.py`.
 
 ```bash
 $ python tools/test_on_single_video.py \
