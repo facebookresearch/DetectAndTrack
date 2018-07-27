@@ -209,7 +209,7 @@ This should reproduce the performance reported above, 55.2% MOTA and 60.6% mAP. 
 In addition, we can also compute detections and tracks for a single video by running the script `test_on_single_video.py`.
 
 ```bash
-$ python test_on_single_video.py \
+$ python tools/test_on_single_video.py \
          --cfg configs/video2d_best/01_R101_best_hungarian-4GPU.yaml \
          --video path/to/video.mp4 \
          --output path/to/output/tracks_and_visualizations \
