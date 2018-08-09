@@ -268,7 +268,7 @@ Trained on 1080Ti. Since the GPU memory is smaller, I can no longer run the 3D m
 # 2D model, pre-trained on ImNet
 $ python launch.py -c configs/video/3d/02_R-18_PTFromImNet-4GPU.yaml
 # 3D model, pre-trained on ImNet
-$ python launch.py -c configs/video/3d/04_R-18-3D_PTFromImNet-8GPU-BATCH1.yam
+$ python launch.py -c configs/video/3d/04_R-18-3D_PTFromImNet-8GPU-BATCH1.yaml
 # 3D model, pre-trained on ImNet
 $ python launch.py -c configs/video/3d/04_R-18-3D_PTFromImNet-4GPU-BATCH1.yaml
 # 2D model, pre-trained on COCO
