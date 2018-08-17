@@ -13,6 +13,7 @@ import shutil
 import yaml
 import glob
 import time
+from copy import deepcopy
 from caffe2.proto import caffe2_pb2
 from caffe2.python import core, workspace
 
@@ -76,6 +77,15 @@ def _read_video_frames(out_path, vid_name, index):
     im = cv2.imread(osp.join(out_path,vid_name + '_frames','%08d.jpg'%(index+1)))
     assert im is not None
     return im
+
+def _read_video_3frames(out_path, vid_name, index):
+    ims = []
+    for i in range(3):
+        im = cv2.imread(osp.join(out_path, vid_name + '_frames', '%08d.jpg'%(index+1+i)))
+        im = np.expand_dims(im, 0)
+        ims.append(im)
+    ret = np.concatenate(ims, axis=0)
+    return ret
 
 def _id_or_index(ix, val):
     if len(val) == 0:
@@ -254,20 +264,61 @@ def main(name_scope, gpu_dev, num_images, args):
     num_classes = cfg.MODEL.NUM_CLASSES
     all_boxes, all_segms, all_keyps = empty_results(num_classes, num_images)
 
-    for i in range(num_images):
-        print('Processing Detection for Frame %d'%(i+1))
-        im_ = _read_video_frames(args.out_path, args.vid_name, i)
-        im_ = np.expand_dims(im_, 0)
-        with core.NameScope(name_scope):
-            with core.DeviceScope(gpu_dev):
-                cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
-                    model, im_, None)                                        #TODO: Parallelize detection
+    if '2d_best' in args.cfg_file:
+        for i in range(num_images):
+            print('Processing Detection for Frame %d'%(i+1))
+            im_ = _read_video_frames(args.out_path, args.vid_name, i)
+            im_ = np.expand_dims(im_, 0)
+            with core.NameScope(name_scope):
+                with core.DeviceScope(gpu_dev):
+                    cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
+                        model, im_, None)                                        #TODO: Parallelize detection
 
-	extend_results(i, all_boxes, cls_boxes_i)
-        if cls_segms_i is not None:
-            extend_results(i, all_segms, cls_segms_i)
-        if cls_keyps_i is not None:
-            extend_results(i, all_keyps, cls_keyps_i)
+            extend_results(i, all_boxes, cls_boxes_i)
+            if cls_segms_i is not None:
+                extend_results(i, all_segms, cls_segms_i)
+            if cls_keyps_i is not None:
+                extend_results(i, all_keyps, cls_keyps_i)
+    elif '3d' in args.cfg_file:
+        for i in range(num_images-2):
+            print('Processing Detection for Frame %d to Frame %d' % (i + 1, i + 2))
+            ims_ = _read_video_3frames(args.out_path, args.vid_name, i)
+            # ims_ = np.expand_dims(ims_, 0)
+            with core.NameScope(name_scope):
+                with core.DeviceScope(gpu_dev):
+                    cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
+                        model, ims_, None)     
+
+            # extend boxes for 3 frames
+            tmp_boxes_i2 = deepcopy(cls_boxes_i)
+            tmp_boxes_i2[1] = tmp_boxes_i2[1][:, 8:]
+            extend_results(i+2, all_boxes, tmp_boxes_i2)
+            tmp_boxes_i1 = deepcopy(cls_boxes_i)
+            tmp_boxes_i1[1] = tmp_boxes_i1[1][:, [4, 5, 6, 7, -1]]
+            extend_results(i+1, all_boxes, tmp_boxes_i1)
+            tmp_boxes_i0 = deepcopy(cls_boxes_i)
+            tmp_boxes_i0[1] = tmp_boxes_i0[1][:, [0, 1, 2, 3, -1]]
+            extend_results(i, all_boxes, tmp_boxes_i0)
+            # extend segms for 3 frames
+            if cls_segms_i is not None:
+                extend_results(i+2, all_segms, cls_segms_i)
+            # extend keyps for 3 frames
+            if cls_keyps_i is not None:
+                # extend the i+2 th one
+                tmp_keyps_i2 = deepcopy(cls_keyps_i)
+                for idx in range(len(tmp_keyps_i2[1])):
+                    tmp_keyps_i2[1][idx] = tmp_keyps_i2[1][idx][:, 34:]
+                extend_results(i+2, all_keyps, tmp_keyps_i2)
+                # extend the i+1 th one
+                tmp_keyps_i1 = deepcopy(cls_keyps_i)
+                for idx in range(len(tmp_keyps_i1[1])):
+                    tmp_keyps_i1[1][idx] = tmp_keyps_i1[1][idx][:, 17:34]
+                extend_results(i + 1, all_keyps, tmp_keyps_i1)
+                # extend the i th one
+                tmp_keyps_i0 = deepcopy(cls_keyps_i)
+                for idx in range(len(tmp_keyps_i0[1])):
+                    tmp_keyps_i0[1][idx] = tmp_keyps_i0[1][idx][:, :17]
+                extend_results(i, all_keyps, tmp_keyps_i0)
 
 
     cfg_yaml = yaml.dump(cfg)
