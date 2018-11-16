@@ -61,7 +61,7 @@ def main():
     elif args.mode == 'eval':
         tool_file = 'eval_mpii.py'
     elif args.mode == 'vis':
-    tool_file = 'visualize_results_v2.py'
+        tool_file = 'visualize_results_v2.py'
     _run_cmd(tool_file, args.cfg_file, other_opts)
 
 
