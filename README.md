@@ -212,7 +212,7 @@ In addition, we can also compute detections and tracks for a single standalone v
 
 ```bash
 $ python tools/test_on_single_video.py \
-         --cfg configs/video2d_best/01_R101_best_hungarian-4GPU.yaml \
+         --cfg configs/video/2d_best/01_R101_best_hungarian-4GPU.yaml \
          --video path/to/video.mp4 \
          --output path/to/output/tracks_and_visualizations \
          TEST.WEIGHTS pretrained_models/configs/video/2d_best/01_R101_best_hungarian-4GPU.yaml/model_final.pkl
